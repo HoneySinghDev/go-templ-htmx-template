@@ -1,0 +1,14 @@
+package layout
+
+import "github.com/HoneySinghDev/go-templ-htmx-template/views/partials"
+
+templ Dashboard(pageInfo PageInfo){
+    @BaseLayout(pageInfo){
+    <body class="bg-bgcolor">
+        // SideBar
+        @partials.SideBar()
+        // Main Content
+         { children... }
+    </body>
+    }
+}

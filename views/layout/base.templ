@@ -1,0 +1,27 @@
+package layout
+
+type PageInfo struct {
+	RequestURI  string
+	Title       string
+	Description string
+	Image       string
+	ImageAlt    string
+}
+
+templ BaseLayout(pageInfo PageInfo) {
+    <html lang="en">
+        <head>
+          <meta charset="utf-8"/>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <meta name="description" content="A brief description of your site" />
+            <meta name="google" content="notranslate" />
+            <title>{ pageInfo.Title }</title>
+            <meta property="og:title" content={ pageInfo.Title } />
+            <meta property="og:description" content={ pageInfo.Description } />
+            <link rel="stylesheet" href="static/styles.css" />
+            <script src="/static/scripts.js" defer></script>
+            <!-- Add other head elements like favicons, canonical links, etc. -->
+        </head>
+        { children... }
+    </html>
+}

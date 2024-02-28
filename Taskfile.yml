@@ -1,0 +1,164 @@
+version: '3'
+
+dotenv: [.env]
+
+tasks:
+  default:
+    desc: Display all available tasks.
+    cmds:
+      - task: list
+
+  list:
+    desc: List all tasks.
+    cmds:
+      - task -l
+
+  install:
+    desc: Initialize the project.
+    cmds:
+      - task: install:bun
+      - task: install:modules
+      - task: install:tools
+      - task: install:golint
+
+  gen:
+    desc: Generate Templ and TailwindCSS files.
+    cmds:
+      - bun run fmt
+      - bun run build
+      - templ generate
+
+  dev:
+    desc: Run the dev server.
+    cmds:
+      - air .
+
+  build:
+    desc: Build production Go binary and assets.
+    cmds:
+      - task: sqlc-gen
+      - task: gen
+      - go build -o bin/app ./main.go
+      - chmod +x bin/app
+
+  dev-caddy:
+    desc: Run Caddy server For WildCard SubDomain For Local Development.
+    cmds:
+      - caddy run --config ./scripts/Caddyfile.dev
+
+  run:
+    desc: Run the Go binary.
+    cmds:
+      - ./bin/app
+
+  install:bun:
+    desc: Install dependencies.
+    cmds:
+      - bun install
+
+  install:golint:
+    desc: Install golint.
+    cmds:
+      - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.55.2
+
+  install:modules:
+    desc: Download Go modules.
+    cmds:
+      - go mod download
+
+  install:tools:
+    desc: Install tools.
+    cmds:
+      - awk -F'"' '/_/ {print $2}' tools.go | xargs -tI % go install %
+
+  vuln:
+    desc: Run Go Vulnerability Check
+    cmds:
+      - govulncheck ./...
+
+  tidy:
+    desc: Tidy go.sum.
+    cmds:
+      - go mod tidy
+
+  lint:
+    desc: Uses golangci-lint
+    cmds:
+      - golangci-lint run
+
+  fmt:
+    desc: Reformat code
+    cmds:
+      - bun run fmt
+      - go fmt ./...
+
+  sql:
+    desc: SQL tasks.
+    cmds:
+      - task: sql-format
+      - task: sql-regenerate
+
+  sql-format:
+    desc: Format SQL files.
+    cmds:
+      - find . -name "*.sql" -exec pg_format --inplace {} \;
+
+  sql-regenerate:
+    desc: Regenerate models from SQL.
+    cmds:
+      - task: sql-spec-reset
+      - task: sql-spec-migrate
+      - task: sql-check-and-generate
+
+  sql-spec-reset:
+    desc: Reset spec database.
+    cmds:
+      - psql -d postgres -c 'DROP DATABASE IF EXISTS '"${PSQL_DBNAME}"';'
+      - psql -d postgres -c 'CREATE DATABASE '"${PSQL_DBNAME}"' WITH OWNER '"${PSQL_USER}"' TEMPLATE "template0";'
+
+  sql-spec-migrate:
+    desc: Apply migrations.
+    cmds:
+      - GOOSE_DRIVER=postgres GOOSE_DBSTRING="user=${PSQL_USER} dbname=${PSQL_DBNAME} sslmode=disable password=${PSQL_PASS}" goose -dir migrations up
+
+  sql-check-and-generate:
+    desc: Check structure and run sqlc-gen.
+    cmds:
+      - task: sql-check-structure
+      - task: sqlc-gen
+
+  sql-check-structure:
+    desc: Check database structure.
+    cmds:
+      - cat scripts/sql/fk_missing_index.sql | psql -qtz0 -d "${PSQL_DBNAME}"
+      - cat scripts/sql/default_zero_values.sql | psql -qtz0 -d "${PSQL_DBNAME}"
+
+  sql-dump:
+    desc: Dump the development database.
+    cmds:
+      - mkdir -p /app/dumps
+      - dumpfile="/app/dumps/dev_$(date '+%Y-%m-%d-%H-%M-%S').sql"
+      - pg_dump development -p -c --if-exists > "$dumpfile"
+
+  sqlc-gen:
+    desc: Run SQLC to generate models.
+    cmds:
+      - PSQL_DBNAME="${PSQL_DBNAME}" PSQL_HOST="${PSQL_HOST}" PSQL_USER="${PSQL_USER}" PSQL_PASS="${PSQL_PASS}" sqlc generate
+
+  sql-check-files:
+    desc: Check SQL files.
+    cmds:
+      - |
+        for sqlfile in $(find . -path "*/tmp/*" -prune -o -type f -name "*.sql" -print); do
+          psql -d postgres -v ON_ERROR_STOP=1 -f "$sqlfile" || exit 1;
+        done
+
+  check:
+    desc: Run all checks.
+    cmds:
+      - task: fmt
+      - task: tidy
+      - task: lint
+      - task: vuln
+      - task: sql-check-files
+      - task: sql-check-structure

@@ -1,0 +1,37 @@
+{
+  "name": "go-templ-htmx-template",
+  "version": "0.0.0",
+  "description": "A simple Go template with htmx and tailwindcss",
+  "license": "MIT",
+  "browserslist": "> 0.5%, last 2 versions, not dead",
+  "source": [
+    "./assets/scripts.js",
+    "./assets/styles.scss"
+  ],
+  "targets": {
+    "default": {
+      "distDir": "./static"
+    }
+  },
+  "scripts": {
+    "watch": "parcel watch",
+    "fmt": "prettier --write .",
+    "dev": "parcel build --no-optimize",
+    "build": "parcel build"
+  },
+  "dependencies": {
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "latest",
+    "alpinejs": "latest",
+    "htmx.org": "latest",
+    "tailwindcss": "latest"
+  },
+  "devDependencies": {
+    "@iconify-json/bi": "^1.1.23",
+    "@iconify-json/material-symbols": "^1.1.73",
+    "@iconify/tailwind": "^0.1.4",
+    "@parcel/transformer-sass": "latest",
+    "parcel": "latest",
+    "prettier": "latest"
+  }
+}

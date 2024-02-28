@@ -1,0 +1,10 @@
+package dashboard
+
+import l "github.com/HoneySinghDev/go-templ-htmx-template/views/layout"
+
+templ Home() {
+    @l.BaseLayout(l.PageInfo{}){
+	<div>Hello world 1245ff</div>
+	<button class="bg-green-400 text-gray-500 p-8 btn btn-primary bg-primary" x-on:click="alert('hello')" > Hello </button>
+    }
+}

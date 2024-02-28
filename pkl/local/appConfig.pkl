@@ -1,0 +1,8 @@
+amends "../appConfig.pkl"
+
+Echo {
+  loggerMiddleware = false
+  secureMiddleware {
+    contentSecurityPolicy = ""
+  }
+}

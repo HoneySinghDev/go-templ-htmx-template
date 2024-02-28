@@ -1,0 +1,85 @@
+@go.Package { name = "github.com/HoneySinghDev/go-templ-htmx-template/pkl/pklgen" }
+
+module appConfig.pkl
+
+import "package://pkg.pkl-lang.org/pkl-go/pkl.golang@0.5.3#/go.pkl"
+
+Echo: EchoConfig
+SB: SupabaseConfig
+DB: DatabaseConfig
+Auth: AuthServerConfig
+Logger: LoggerConfig
+Management: ManagementServerConfig
+
+class EchoConfig {
+  debug: Boolean = false
+  listenAddr: String = ":8080"
+  hideInternalServerErrorDetails: Boolean = false
+  baseUrl: String?
+  loggerMiddleware: Boolean = true
+  recoverMiddleware: Boolean = true
+  secureMiddleware: EchoServerSecureMiddlewareConfig
+}
+
+class SupabaseConfig {
+  ApiUrl: String = read("env:SUPABASE_API_URL")
+  SecretKey: String = read("env:SUPABASE_API_SECRET")
+}
+
+class DatabaseConfig {
+  PSQLDB: String = read("env:PSQL_DBNAME")
+  PSQLHOST: String(matches(Regex("^(localhost|\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})$"))) = read("env:PSQL_HOST")
+  PSQLPORT: Int32 = 5432
+  PSQLUSER: String = read("env:PSQL_USER")
+  PSQLPASS: String = read("env:PSQL_PASS")
+  AdditionalParams: Map<String,String>
+  DBMaxOpenConns: Int = 10
+  MaxIdleConns: Int = 5
+  MinIdleConns: Int = 1
+  ConnectionMaxLifetime: Duration = 0.s
+}
+
+// EchoServerSecureMiddleware represents a subset of echo's secure middleware config relevant to the app server.
+// https://github.com/labstack/echo/blob/master/middleware/secure.go
+class EchoServerSecureMiddlewareConfig {
+  enable: Boolean = true
+  xssProtection: String = "1; mode=block"
+  contentTypeNosniff: String = "nosniff"
+  xFrameOptions: String = "DENY"
+  hstsMaxAge: Int = 31536000
+  hstsExcludeSubdomains: Boolean = false
+  hstsPreload: Boolean = false
+  contentSecurityPolicy: String = "default-src 'self'"
+  cspReportOnly: Boolean = false
+  referrerPolicy: String = "same-origin"
+}
+
+class AuthServerConfig {
+  accessTokenValidity: Duration = 1.h
+  passwordresetTokenValidity: Duration = 1.h
+  defaultUserScopes: List<String> = List("user","read")
+  lastAuthenticatedAtThreshold: Duration = 1.h
+}
+
+class LoggerConfig {
+  level: LoggerLevel = "DEBUG"
+  requestLevel: LoggerLevel = "DEBUG"
+  requestBody: Boolean = false
+  requestHeader: Boolean = false
+  requestQuery: Boolean = false
+  responseHeader: Boolean = false
+  responseBody: Boolean = false
+  logCaller: Boolean = false
+  preetyPrintConsole: Boolean = false
+}
+
+class ManagementServerConfig {
+  secret: String = read("env:MANAGEMENT_SERVER_SECRET")
+  readinessTimeout: Duration = 5.s
+  livenessTimeout: Duration = 5.s
+  probeWritablePathAbs: List<String> = List("/tmp")
+  probeWriteableTouchfile: String = ".healthy"
+}
+
+
+typealias LoggerLevel = "DEBUG" | "INFO" | "WARN" | "ERROR" | "FATAL" | "PANIC" | "Disabled" |"TRACE"

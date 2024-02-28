@@ -1,0 +1,19 @@
+version: '2'
+sql:
+  - engine: 'postgresql'
+    queries: 'queries/*.sql'
+    schema: 'migrations/*.sql'
+    database:
+      uri: 'postgresql://${PSQL_USER}:${PSQL_PASS}@${PSQL_HOST}:5432/${PSQL_DBNAME}?sslmode=disable'
+    gen:
+      go:
+        package: 'db'
+        out: 'internal/db'
+        sql_package: 'pgx/v5'
+        emit_json_tags: true
+        emit_empty_slices: true
+        overrides:
+          - db_type: 'pg_catalog.timestamp'
+            go_type:
+              import: 'time'
+              type: 'Time'
