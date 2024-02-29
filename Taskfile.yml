@@ -32,7 +32,7 @@ tasks:
   config-gen:
     desc: Generate config file.
     cmds:
-      - pkl-gen-go pkl/botConfig.pkl
+      - pkl-gen-go pkl/appConfig.pkl
 
   dev:
     desc: Run the dev server.
