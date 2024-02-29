@@ -27,6 +27,12 @@ tasks:
       - bun run fmt
       - bun run build
       - templ generate
+      - config-gen
+
+  config-gen:
+    desc: Generate config file.
+    cmds:
+      - pkl-gen-go pkl/botConfig.pkl
 
   dev:
     desc: Run the dev server.
