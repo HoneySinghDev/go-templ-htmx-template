@@ -45,6 +45,8 @@ Compiles Go binary and frontend assets. Deploy `bin/app` to your server.
 - **Tailwind CSS**: Utility-first styling for rapid UI development.
 - **Alpine.js**: Lightweight JavaScript for enhanced interactivity.
 
+- [ ] Trying Experimental NilAway: A tool to help you avoid nil pointer dereferencing in Go. [Check](https://github.com/uber-go/nilaway/issues/175)
+
 ## Contributing
 
 Contributions are welcome. Fork this repository, make your changes, and submit a pull request.

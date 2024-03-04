@@ -16,9 +16,9 @@ import (
 // and pass the context returned to other code/`LogFromContext`.
 func LogFromContext(ctx context.Context) *zerolog.Logger {
 	l := log.Ctx(ctx)
-	if l.GetLevel() == zerolog.Disabled {
+	if l == nil || l.GetLevel() == zerolog.Disabled {
 		if ShouldDisableLogger(ctx) {
-			return l
+			return &log.Logger
 		}
 		l = &log.Logger
 	}

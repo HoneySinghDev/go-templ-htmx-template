@@ -19,6 +19,10 @@ import (
 	"github.com/rs/zerolog"
 )
 
+const (
+	timeOutValue = 10
+)
+
 func App() {
 	c := config.DefaultServiceConfig()
 
@@ -34,14 +38,11 @@ func App() {
 
 	s := server.NewServer(c)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	if err := s.InitDB(ctx); err != nil {
-		cancel()
+	if err := s.InitDB(); err != nil {
 		log.Fatal().Err(err).Msg("Failed to initialize database")
 	}
-	cancel()
 
-	//Init SupaBase Client
+	// Init SupaBase Client
 	s.SB = sb.InitSB(c.Supabase.ApiUrl, c.Supabase.SecretKey)
 
 	router.Init(s)
@@ -60,10 +61,10 @@ func App() {
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 	<-quit
 
-	ctx, cancel = context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeOutValue)*time.Second)
 	defer cancel()
 
 	if err := s.Shutdown(ctx); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		log.Fatal().Err(err).Msg("Failed to gracefully shut down server")
+		log.Panic().Err(err).Msg("Failed to gracefully shut down server")
 	}
 }

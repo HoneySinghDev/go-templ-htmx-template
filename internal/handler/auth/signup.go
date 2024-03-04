@@ -1,9 +1,10 @@
 package auth
 
 import (
+	"net/http"
+
 	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
-	"net/http"
 
 	"github.com/HoneySinghDev/go-templ-htmx-template/pkg/server"
 	util "github.com/HoneySinghDev/go-templ-htmx-template/pkg/utils"

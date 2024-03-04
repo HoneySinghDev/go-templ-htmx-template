@@ -19,12 +19,12 @@ const (
 func RequestIDFromContext(ctx context.Context) (string, error) {
 	val := ctx.Value(CTXKeyRequestID)
 	if val == nil {
-		return "", errors.New("No request ID present in context")
+		return "", errors.New("no request ID present in context")
 	}
 
 	id, ok := val.(string)
 	if !ok {
-		return "", errors.New("Request ID in context is not a string")
+		return "", errors.New("request ID in context is not a string")
 	}
 
 	return id, nil

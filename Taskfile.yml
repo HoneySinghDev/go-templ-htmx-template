@@ -26,13 +26,18 @@ tasks:
     cmds:
       - bun run fmt
       - bun run build
-      - templ generate
-      - config-gen
+      - task: generate-templ
+      - task: config-gen
 
   config-gen:
     desc: Generate config file.
     cmds:
       - pkl-gen-go pkl/appConfig.pkl
+
+  generate-templ:
+    desc: Generate Templ files.
+    cmds:
+      - templ generate
 
   dev:
     desc: Run the dev server.
@@ -86,6 +91,9 @@ tasks:
     desc: Tidy go.sum.
     cmds:
       - go mod tidy
+
+  nil-away:
+    nilaway -exclude-pkgs="github.com/labstack/echo,github.com/a-h/templ,github.com/cosmtrek/air,github.com/nedpals/supabase-go,github.com/apple/pkl-go" ./...
 
   lint:
     desc: Uses golangci-lint
@@ -165,6 +173,7 @@ tasks:
       - task: fmt
       - task: tidy
       - task: lint
+      - task: nil-away
       - task: vuln
       - task: sql-check-files
       - task: sql-check-structure

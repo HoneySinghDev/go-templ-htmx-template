@@ -8,29 +8,29 @@ import (
 )
 
 const (
-	auth_sessions_key        = "access_token"
-	auth_key          string = "authenticated"
-	user_id_key       string = "user_id"
-	email_key         string = "email"
+	authSessionsKey        = "access_token"
+	authKey         string = "authenticated"
+	userIDKey       string = "user_id"
+	emailKey        string = "email"
 )
 
 func WithAuth(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		sess, err := session.Get(auth_sessions_key, c)
+		sess, err := session.Get(authSessionsKey, c)
 		if err != nil {
 			return c.Redirect(http.StatusSeeOther, "/login")
 		}
 
-		if auth, ok := sess.Values[auth_key].(bool); !ok || !auth {
+		if auth, ok := sess.Values[authKey].(bool); !ok || !auth {
 			return c.Redirect(http.StatusSeeOther, "/login")
 		}
 
-		if userId, ok := sess.Values[user_id_key].(int); ok && userId != 0 {
-			c.Set(user_id_key, userId) // set the user_id in the context
+		if userID, ok := sess.Values[userIDKey].(int); ok && userID != 0 {
+			c.Set(userIDKey, userID) // set the user_id in the context
 		}
 
-		if email, ok := sess.Values[email_key].(string); ok && email != "" {
-			c.Set(email_key, email) // set the email in the context
+		if email, ok := sess.Values[emailKey].(string); ok && email != "" {
+			c.Set(emailKey, email) // set the email in the context
 		}
 
 		return next(c)

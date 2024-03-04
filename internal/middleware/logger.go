@@ -4,13 +4,14 @@ import (
 	"bufio"
 	"bytes"
 	"context"
-	"github.com/labstack/echo/v4"
 	"io"
 	"net"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/labstack/echo/v4"
 
 	util "github.com/HoneySinghDev/go-templ-htmx-template/pkg/utils"
 	"github.com/labstack/echo/v4/middleware"
@@ -103,24 +104,6 @@ func DefaultQueryLogReplacer(query url.Values) url.Values {
 	return query
 }
 
-var (
-	DefaultLoggerConfig = LoggerConfig{
-		Skipper:                  middleware.DefaultSkipper,
-		Level:                    zerolog.DebugLevel,
-		LogRequestBody:           false,
-		LogRequestHeader:         false,
-		LogRequestQuery:          false,
-		RequestBodyLogSkipper:    DefaultRequestBodyLogSkipper,
-		RequestBodyLogReplacer:   DefaultBodyLogReplacer,
-		RequestHeaderLogReplacer: DefaultHeaderLogReplacer,
-		RequestQueryLogReplacer:  DefaultQueryLogReplacer,
-		LogResponseBody:          false,
-		LogResponseHeader:        false,
-		ResponseBodyLogSkipper:   DefaultResponseBodyLogSkipper,
-		ResponseBodyLogReplacer:  DefaultBodyLogReplacer,
-	}
-)
-
 type LoggerConfig struct {
 	Skipper                   middleware.Skipper
 	Level                     zerolog.Level
@@ -139,16 +122,35 @@ type LoggerConfig struct {
 	ResponseHeaderLogReplacer HeaderLogReplacer
 }
 
-// Logger with default logger output and configuration
-func Logger() echo.MiddlewareFunc {
-	return LoggerWithConfig(DefaultLoggerConfig, nil)
+// Initialize default configuration within the function scope to avoid global variable.
+func getDefaultLoggerConfig() LoggerConfig {
+	return LoggerConfig{
+		Skipper:                  middleware.DefaultSkipper,
+		Level:                    zerolog.DebugLevel,
+		LogRequestBody:           false,
+		LogRequestHeader:         false,
+		LogRequestQuery:          false,
+		RequestBodyLogSkipper:    DefaultRequestBodyLogSkipper,
+		RequestBodyLogReplacer:   DefaultBodyLogReplacer,
+		RequestHeaderLogReplacer: DefaultHeaderLogReplacer,
+		RequestQueryLogReplacer:  DefaultQueryLogReplacer,
+		LogResponseBody:          false,
+		LogResponseHeader:        false,
+		ResponseBodyLogSkipper:   DefaultResponseBodyLogSkipper,
+		ResponseBodyLogReplacer:  DefaultBodyLogReplacer,
+	}
 }
 
-// LoggerWithConfig returns a new MiddlewareFunc which creates a logger with the desired configuration.
+// Logger with default logger output and configuration.
+func Logger() echo.MiddlewareFunc {
+	return WithConfig(getDefaultLoggerConfig(), nil)
+}
+
+// WithConfig returns a new MiddlewareFunc which creates a logger with the desired configuration.
 // If output is set to nil, the default output is used. If more output params are provided, the first is being used.
-func LoggerWithConfig(config LoggerConfig, output ...io.Writer) echo.MiddlewareFunc {
+func WithConfig(config LoggerConfig, output ...io.Writer) echo.MiddlewareFunc {
 	if config.Skipper == nil {
-		config.Skipper = DefaultLoggerConfig.Skipper
+		config.Skipper = getDefaultLoggerConfig().Skipper
 	}
 	if config.RequestBodyLogSkipper == nil {
 		config.RequestBodyLogSkipper = DefaultRequestBodyLogSkipper
@@ -172,6 +174,11 @@ func LoggerWithConfig(config LoggerConfig, output ...io.Writer) echo.MiddlewareF
 		config.ResponseHeaderLogReplacer = DefaultHeaderLogReplacer
 	}
 
+	return processRequestAndResponse(config, output...)
+}
+
+//nolint:funlen,gocognit,cyclop // This function is long and complex by design.
+func processRequestAndResponse(config LoggerConfig, output ...io.Writer) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			if config.Skipper(c) {
@@ -180,68 +187,56 @@ func LoggerWithConfig(config LoggerConfig, output ...io.Writer) echo.MiddlewareF
 
 			req := c.Request()
 			res := c.Response()
-
 			id := req.Header.Get(echo.HeaderXRequestID)
-			if len(id) == 0 {
+			if id == "" {
 				id = res.Header().Get(echo.HeaderXRequestID)
 			}
 
-			in := req.Header.Get(echo.HeaderContentLength)
-			if len(in) == 0 {
-				in = "0"
-			}
-
 			l := log.With().
-				Dict("req", zerolog.Dict().
-					Str("id", id).
-					Str("host", req.Host).
-					Str("method", req.Method).
-					Str("url", req.URL.String()).
-					Str("bytes_in", in),
-				).Logger()
+				Str("id", id).
+				Str("host", req.Host).
+				Str("method", req.Method).
+				Str("url", req.URL.String()).
+				Str("bytes_in", req.Header.Get(echo.HeaderContentLength)).
+				Logger()
 
 			if len(output) > 0 {
 				l = l.Output(output[0])
 			}
 
 			if config.LogCaller {
-				// Caller uses https://pkg.go.dev/runtime#Caller underneath and might decrease the performance.
 				l = l.With().Caller().Logger()
 			}
 
 			le := l.WithLevel(config.Level)
-			req = req.WithContext(l.WithContext(context.WithValue(req.Context(), util.CTXKeyRequestID, id)))
+			req = req.WithContext(context.WithValue(req.Context(), util.CTXKeyRequestID, id))
 
+			var err error
 			if config.LogRequestBody && !config.RequestBodyLogSkipper(req) {
-				var reqBody []byte
-				var err error
-				if req.Body != nil {
-					reqBody, err = io.ReadAll(req.Body)
-					if err != nil {
-						l.Error().Err(err).Msg("Failed to read body while logging request")
-						return err
-					}
-
-					req.Body = io.NopCloser(bytes.NewBuffer(reqBody))
+				reqBody, err := io.ReadAll(req.Body)
+				if err != nil {
+					le.Err(err).Msg("Failed to read body while logging request")
+					return err
 				}
-
-				le = le.Bytes("req_body", config.RequestBodyLogReplacer(reqBody))
+				reqBody = config.RequestBodyLogReplacer(reqBody)
+				le.Bytes("req_body", reqBody)
+				req.Body = io.NopCloser(bytes.NewBuffer(reqBody))
 			}
+
 			if config.LogRequestHeader {
 				header := zerolog.Dict()
 				for k, v := range config.RequestHeaderLogReplacer(req.Header) {
 					header.Strs(k, v)
 				}
-
-				le = le.Dict("req_header", header)
+				le.Dict("req_header", header)
 			}
+
 			if config.LogRequestQuery {
 				query := zerolog.Dict()
 				for k, v := range req.URL.Query() {
 					query.Strs(k, v)
 				}
-
-				le = le.Dict("req_query", query)
+				le.Dict("req_query", query)
 			}
 
 			le.Msg("Request received")
@@ -251,18 +246,16 @@ func LoggerWithConfig(config LoggerConfig, output ...io.Writer) echo.MiddlewareF
 			var resBody bytes.Buffer
 			if config.LogResponseBody {
 				mw := io.MultiWriter(res.Writer, &resBody)
-				writer := &bodyDumpResponseWriter{Writer: mw, ResponseWriter: res.Writer}
-				res.Writer = writer
+				res.Writer = &bodyDumpResponseWriter{Writer: mw, ResponseWriter: res.Writer}
 			}
 
 			start := time.Now()
-			err := next(c)
+			err = next(c)
 			if err != nil {
 				c.Error(err)
 			}
 			stop := time.Now()
 
-			// Retrieve logger from context again since other middlewares might have enhanced it
 			ll := util.LogFromEchoContext(c)
 			lle := ll.WithLevel(config.Level).
 				Dict("res", zerolog.Dict().
@@ -273,15 +266,15 @@ func LoggerWithConfig(config LoggerConfig, output ...io.Writer) echo.MiddlewareF
 				)
 
 			if config.LogResponseBody && !config.ResponseBodyLogSkipper(req, res) {
-				lle = lle.Bytes("res_body", config.ResponseBodyLogReplacer(resBody.Bytes()))
+				lle.Bytes("res_body", config.ResponseBodyLogReplacer(resBody.Bytes()))
 			}
+
 			if config.LogResponseHeader {
 				header := zerolog.Dict()
-				for k, v := range config.ResponseHeaderLogReplacer(res.Header()) {
+				for k, v := range config.RequestHeaderLogReplacer(req.Header) {
 					header.Strs(k, v)
 				}
-
-				lle = lle.Dict("res_header", header)
+				lle.Dict("res_header", header)
 			}
 
 			lle.Msg("Response sent")

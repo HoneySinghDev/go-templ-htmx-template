@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+
 	"github.com/labstack/echo/v4"
 	"github.com/nedpals/supabase-go"
 
@@ -10,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog/log"
 
-	// Import postgres driver for database/sql package
+	// Import postgres driver for database/sql package.
 	_ "github.com/lib/pq"
 )
 
@@ -46,7 +47,7 @@ func (s *Server) Ready() bool {
 		s.Router != nil
 }
 
-func (s *Server) InitDB(ctx context.Context) error {
+func (s *Server) InitDB() error {
 	pgxPoolConfig, err := pgxpool.ParseConfig(s.Config.DBConnectionString())
 	if err != nil {
 		return err

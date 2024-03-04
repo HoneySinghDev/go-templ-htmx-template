@@ -32,6 +32,9 @@ func (d CacheControlDirective) String() string {
 
 func ParseCacheControlDirective(d string) CacheControlDirective {
 	parts := strings.Split(d, "=")
+	if len(parts) == 0 {
+		return 0
+	}
 	switch strings.ToLower(parts[0]) {
 	case "no-cache":
 		return CacheControlDirectiveNoCache
@@ -47,10 +50,10 @@ func ParseCacheControlHeader(val string) CacheControlDirective {
 
 	directives := strings.Split(val, ",")
 	for _, dir := range directives {
-		res = res | ParseCacheControlDirective(dir)
+		res |= ParseCacheControlDirective(dir)
 	}
 
-	return CacheControlDirective(res)
+	return res
 }
 
 func CacheControlDirectiveFromContext(ctx context.Context) CacheControlDirective {

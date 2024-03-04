@@ -2,11 +2,12 @@ package auth
 
 import (
 	"context"
+	"net/http"
+	"time"
+
 	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
 	"github.com/nedpals/supabase-go"
-	"net/http"
-	"time"
 
 	"github.com/HoneySinghDev/go-templ-htmx-template/pkg/server"
 	util "github.com/HoneySinghDev/go-templ-htmx-template/pkg/utils"
@@ -18,10 +19,11 @@ import (
 )
 
 const (
-	auth_sessions_key        = "access_token"
-	auth_key          string = "authenticated"
-	user_id_key       string = "user_id"
-	email_key         string = "email"
+	authSessionsKey        = "access_token"
+	authKey         string = "authenticated"
+	userIDKey       string = "user_id"
+	emailKey        string = "email"
+	Time24Hours            = 24
 )
 
 func HandleLoginIndex(_ *server.Server) echo.HandlerFunc {
@@ -72,28 +74,33 @@ func HandleLoginCreate(s *server.Server) echo.HandlerFunc {
 			}))
 		}
 
-		sess, err := session.Get(auth_sessions_key, c)
-		if err != nil {
-			log.Debug().
-				Err(err).
-				Msg("Error while getting session")
-		}
-		sess.Options = &sessions.Options{
-			Path:     "/",
-			MaxAge:   time.Now().Add(s.Config.Auth.AccessTokenValidity.GoDuration()).Second(),
-			HttpOnly: true,
-		}
-
-		// Set user as authenticated, their username,
-		// their ID and the client's time zone
-		sess.Values = map[interface{}]interface{}{
-			auth_key:    true,
-			user_id_key: authUser.User.ID,
-			email_key:   authUser.User.Email,
-		}
-
-		_ = sess.Save(c.Request(), c.Response())
+		SaveSession(c, authUser)
 
 		return htmx.NewResponse().Redirect("/dashboard").Write(c.Response())
 	}
+}
+
+func SaveSession(c echo.Context, user *supabase.AuthenticatedDetails) {
+	sess, err := session.Get(authSessionsKey, c)
+	if err != nil || sess == nil {
+		log.Debug().
+			Err(err).
+			Msg("Error while getting session")
+	}
+
+	sess.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   time.Now().Add(Time24Hours * time.Hour).Second(),
+		HttpOnly: true,
+	}
+
+	// Set user as authenticated, their username,
+	// their ID and the client's time zone
+	sess.Values = map[interface{}]interface{}{
+		authKey:   true,
+		userIDKey: user.User.ID,
+		emailKey:  user.User.Email,
+	}
+
+	_ = sess.Save(c.Request(), c.Response())
 }

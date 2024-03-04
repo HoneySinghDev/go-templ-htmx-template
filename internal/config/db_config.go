@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// DBConnectionString generates a connection string to be passed to sql.Open or equivalents, assuming Postgres syntax
+// DBConnectionString generates a connection string to be passed to sql.Open or equivalents, assuming Postgres syntax.
 func (s *Server) DBConnectionString() string {
 	var b strings.Builder
 	b.WriteString(fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s", s.Database.PSQLHOST, s.Database.PSQLPORT,

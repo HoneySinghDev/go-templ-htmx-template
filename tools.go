@@ -15,5 +15,6 @@ import (
 	_ "github.com/jdudmesh/gomon"
 	_ "github.com/pressly/goose/v3"
 	_ "github.com/sqlc-dev/sqlc/cmd/sqlc"
+	_ "go.uber.org/nilaway/cmd/nilaway"
 	_ "golang.org/x/vuln/cmd/govulncheck"
 )

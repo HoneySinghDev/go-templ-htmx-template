@@ -34,7 +34,7 @@ func NewValidator(data interface{}) *Validator {
 // Rule represents a validation rule.
 type Rule struct {
 	validate func(value interface{}, params ...interface{}) bool
-	msg      func(field string, params ...interface{}) string
+	msg      func(field string, _ ...interface{}) string
 	params   []interface{}
 }
 
@@ -79,7 +79,7 @@ func (v *Validator) GetErrors() map[string][]string {
 // Required Helper functions to create common rules.
 func Required() Rule {
 	return Rule{
-		validate: func(value interface{}, params ...interface{}) bool {
+		validate: func(value interface{}, _ ...interface{}) bool {
 			switch v := value.(type) {
 			case string:
 				return strings.TrimSpace(v) != ""
@@ -87,27 +87,27 @@ func Required() Rule {
 				return value != nil
 			}
 		},
-		msg: func(field string, params ...interface{}) string {
-			return fmt.Sprintf("%s is required", field)
+		msg: func(field string, _ ...interface{}) string {
+			return field + " is required"
 		},
 	}
 }
 
 func Email() Rule {
 	return Rule{
-		validate: func(value interface{}, params ...interface{}) bool {
+		validate: func(value interface{}, _ ...interface{}) bool {
 			str, ok := value.(string)
 			return ok && emailRegex.MatchString(str)
 		},
-		msg: func(field string, params ...interface{}) string {
-			return fmt.Sprintf("%s is not a valid email address", field)
+		msg: func(field string, _ ...interface{}) string {
+			return field + " is not a valid email address"
 		},
 	}
 }
 
 func StrongPassword() Rule {
 	return Rule{
-		validate: func(value interface{}, params ...interface{}) bool {
+		validate: func(value interface{}, _ ...interface{}) bool {
 			password, ok := value.(string)
 			if !ok || len(password) < 8 {
 				return false
@@ -118,20 +118,20 @@ func StrongPassword() Rule {
 			hasSpecial := regexp.MustCompile(`[\W_]`).MatchString(password)
 			return hasUpper && hasLower && hasDigit && hasSpecial
 		},
-		msg: func(field string, params ...interface{}) string {
-			return fmt.Sprintf("%s is not a strong enough password", field)
+		msg: func(field string, _ ...interface{}) string {
+			return field + " is not a strong enough password"
 		},
 	}
 }
 
 func URL() Rule {
 	return Rule{
-		validate: func(value interface{}, params ...interface{}) bool {
+		validate: func(value interface{}, _ ...interface{}) bool {
 			str, ok := value.(string)
 			return ok && urlRegex.MatchString(str)
 		},
-		msg: func(field string, params ...interface{}) string {
-			return fmt.Sprintf("%s is not a valid URL", field)
+		msg: func(field string, _ ...interface{}) string {
+			return field + " is not a valid URL"
 		},
 	}
 }
@@ -139,19 +139,19 @@ func URL() Rule {
 func PhoneNumber() Rule {
 	// Adjust the regex according to the phone number formats you want to support
 	return Rule{
-		validate: func(value interface{}, params ...interface{}) bool {
+		validate: func(value interface{}, _ ...interface{}) bool {
 			str, ok := value.(string)
 			return ok && phoneRegex.MatchString(str)
 		},
-		msg: func(field string, params ...interface{}) string {
-			return fmt.Sprintf("%s is not a valid phone number", field)
+		msg: func(field string, _ ...interface{}) string {
+			return field + " is not a valid phone number"
 		},
 	}
 }
 
 func Min(min int) Rule {
 	return Rule{
-		validate: func(value interface{}, params ...interface{}) bool {
+		validate: func(value interface{}, _ ...interface{}) bool {
 			switch v := value.(type) {
 			case string:
 				return len(v) >= min
@@ -161,7 +161,7 @@ func Min(min int) Rule {
 				return false
 			}
 		},
-		msg: func(field string, params ...interface{}) string {
+		msg: func(field string, _ ...interface{}) string {
 			return fmt.Sprintf("%s must be at least %d", field, min)
 		},
 	}
@@ -169,7 +169,7 @@ func Min(min int) Rule {
 
 func Max(max int) Rule {
 	return Rule{
-		validate: func(value interface{}, params ...interface{}) bool {
+		validate: func(value interface{}, _ ...interface{}) bool {
 			switch v := value.(type) {
 			case string:
 				return len(v) <= max
@@ -179,7 +179,7 @@ func Max(max int) Rule {
 				return false
 			}
 		},
-		msg: func(field string, params ...interface{}) string {
+		msg: func(field string, _ ...interface{}) string {
 			return fmt.Sprintf("%s must not exceed %d", field, max)
 		},
 	}
@@ -187,19 +187,19 @@ func Max(max int) Rule {
 
 func IP() Rule {
 	return Rule{
-		validate: func(value interface{}, params ...interface{}) bool {
+		validate: func(value interface{}, _ ...interface{}) bool {
 			str, ok := value.(string)
 			return ok && ipRegex.MatchString(str)
 		},
-		msg: func(field string, params ...interface{}) string {
-			return fmt.Sprintf("%s is not a valid IP address", field)
+		msg: func(field string, _ ...interface{}) string {
+			return field + " is not a valid IP address"
 		},
 	}
 }
 
 func In(values ...interface{}) Rule {
 	return Rule{
-		validate: func(value interface{}, params ...interface{}) bool {
+		validate: func(value interface{}, _ ...interface{}) bool {
 			for _, v := range values {
 				if reflect.DeepEqual(v, value) {
 					return true
@@ -207,15 +207,15 @@ func In(values ...interface{}) Rule {
 			}
 			return false
 		},
-		msg: func(field string, params ...interface{}) string {
-			return fmt.Sprintf("%s is not a valid value", field)
+		msg: func(field string, _ ...interface{}) string {
+			return field + " is not a valid value"
 		},
 	}
 }
 
 func NotIn(values ...interface{}) Rule {
 	return Rule{
-		validate: func(value interface{}, params ...interface{}) bool {
+		validate: func(value interface{}, _ ...interface{}) bool {
 			for _, v := range values {
 				if reflect.DeepEqual(v, value) {
 					return false
@@ -223,22 +223,22 @@ func NotIn(values ...interface{}) Rule {
 			}
 			return true
 		},
-		msg: func(field string, params ...interface{}) string {
-			return fmt.Sprintf("%s is not a valid value", field)
+		msg: func(field string, _ ...interface{}) string {
+			return field + " is not a valid value"
 		},
 	}
 }
 
 // Custom - Create a custom validation rule.
 // Usage:
-// 	v.AddRule("Field", validate.Custom(func(value interface{}, params ...interface{}) bool {
+// 	v.AddRule("Field", validate.Custom(func(value interface{}, _ ...interface{}) bool {
 //		return value == "some value"
 //	}, "Field must be some value"))
 
 func Custom(fn func(interface{}, ...interface{}) bool, msg string) Rule {
 	return Rule{
 		validate: fn,
-		msg: func(field string, params ...interface{}) string {
+		msg: func(_ string, _ ...interface{}) string {
 			return msg
 		},
 	}

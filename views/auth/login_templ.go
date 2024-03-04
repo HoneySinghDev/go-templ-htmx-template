@@ -33,7 +33,7 @@ func LoginPage() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<body class=\"bg-bgcolor font-inter min-h-screen flex items-center justify-center\"><div class=\"w-full max-w-md p-8 mx-auto rounded-lg bg-colorcard shadow-cardshadow\"><div class=\"flex flex-col items-center mb-6\"><span class=\"w-20 h-20 mb-4 icon-[bi--person-fill] text-white\"></span><h2 class=\"text-center text-3xl font-bold text-gray4 mb-2\">Welcome Back!</h2><p class=\"text-center text-gray4\">Please sign in to continue</p></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<body class=\"bg-bgcolor font-inter min-h-screen flex items-center justify-center\"><div class=\"w-full max-w-md p-8 mx-auto rounded-lg bg-colorcard shadow-cardshadow\"><div class=\"flex flex-col items-center mb-6\"><span class=\"w-20 h-20 mb-4 icon-[bi--person-fill] text-white\"></span><h2 class=\"text-center text-3xl font-bold text-gray4 mb-2\">Welcome Back! Kesu</h2><p class=\"text-center text-gray4\">Please sign in to continue</p></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

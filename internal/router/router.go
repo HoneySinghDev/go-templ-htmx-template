@@ -1,12 +1,12 @@
 package router
 
 import (
-	"github.com/labstack/echo/v4"
 	"net/http"
 	"strings"
 
 	"github.com/HoneySinghDev/go-templ-htmx-template/pkg/server"
 	"github.com/gorilla/sessions"
+	"github.com/labstack/echo/v4"
 
 	"github.com/HoneySinghDev/go-templ-htmx-template/internal/handler"
 
@@ -16,6 +16,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+//nolint:funlen
 func Init(s *server.Server) {
 	s.Echo = echo.New()
 
@@ -50,7 +51,7 @@ func Init(s *server.Server) {
 	}
 
 	if s.Config.Echo.LoggerMiddleware {
-		s.Echo.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		s.Echo.Use(middleware.WithConfig(middleware.LoggerConfig{
 			Level:             s.Config.LogLevelFromString(s.Config.Logger.RequestLevel),
 			LogRequestHeader:  s.Config.Logger.RequestHeader,
 			LogRequestBody:    s.Config.Logger.RequestBody,
@@ -101,15 +102,12 @@ func Init(s *server.Server) {
 		// Management endpoints, uncacheable, secured by key auth (query param), available at /-/**
 		Management: s.Echo.Group("/-", echoMiddleware.KeyAuthWithConfig(echoMiddleware.KeyAuthConfig{
 			KeyLookup: "query:mgmt-secret",
-			Validator: func(key string, c echo.Context) (bool, error) {
+			Validator: func(key string, _ echo.Context) (bool, error) {
 				return key == s.Config.Management.Secret, nil
 			},
 			Skipper: func(c echo.Context) bool {
-				switch c.Path() {
-				case "/-/ready":
-					return true
-				}
-				return false
+				// We skip key auth for readiness and liveness endpoints
+				return c.Path() == "/-/ready"
 			},
 		}), middleware.NoCache()),
 	}
@@ -117,10 +115,10 @@ func Init(s *server.Server) {
 	// Session Middleware
 	s.Echo.Use(session.Middleware(sessions.NewCookieStore([]byte(s.Config.Management.Secret))))
 
-	//Static file server
+	// Static file server
 	s.Echo.Static("/static", "static")
 
 	// ---
-	// Finally attach our handlers
+	// Finally, attach our handlers
 	handler.AttachAllRoutes(s)
 }
