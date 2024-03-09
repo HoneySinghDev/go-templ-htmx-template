@@ -37,12 +37,22 @@ tasks:
   generate-templ:
     desc: Generate Templ files.
     cmds:
-      - templ generate
+      - air
 
   dev:
     desc: Run the dev server.
     cmds:
-      - air .
+        - task --parallel dev:air dev:templ
+
+  dev:air:
+    desc: Run the dev server with air.
+    cmds:
+      - air
+
+  dev:templ:
+      desc: Run the dev server with templ.
+      cmds:
+        - templ generate --watch --proxy="http://localhost:8080" --cmd="./airtempl"
 
   build:
     desc: Build production Go binary and assets.

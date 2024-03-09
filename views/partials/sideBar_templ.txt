@@ -1,0 +1,1 @@
+<div x-data=\"{ isOpen: false, mainContentWidth: &#39;w-[275px]&#39; }\"><div class=\"fixed top-0 h-screen z-50 bg-slate-900\"></div></div>

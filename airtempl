@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+file="airtempl.txt"
+
+# Check if file exists, if not create it
+touch $file 
+
+# Increment the value in file
+echo $(( $(<$file) + 1 )) > $file 

@@ -2,11 +2,12 @@ root = "."
 tmp_dir = "tmp"
 
 [build]
-pre_cmd = ["bun run fmt "]
+pre_cmd = [""]
 bin = "./tmp/main"
-cmd = "templ generate && go build -o ./tmp/main ./main.go"
+cmd = "go build -o ./tmp/main ."
 include_dir = []
-include_ext = ["go", "tpl", "tmpl", "templ", "html"]
+include_ext = ["go"]
+include_file = ["airtempl.txt"] # need to include this as to detect when to update based on templ
 exclude_dir = ["bin", "dist","assets", "tmp", "vendor", "node_modules", "bin","tests", "vendor"]
 exclude_file = []
 exclude_regex = ["_test\\.go", "_templ\\.go"]
@@ -14,8 +15,10 @@ exclude_unchanged = false
 follow_symlink = false
 log = "build-errors-air.log"
 full_bin = ""
-delay = 1000
+delay = 1
 poll = false
+rerun = false
+rerun_delay = 500
 poll_interval = 500
 kill_delay = "0s"
 send_interrupt = false
@@ -32,8 +35,8 @@ watcher = "cyan"
 time = false
 
 [misc]
-clean_on_exit = true
+clean_on_exit = false
 
 [screen]
-clear_on_rebuild = true
+clear_on_rebuild = false
 keep_scroll = true

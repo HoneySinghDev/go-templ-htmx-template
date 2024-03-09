@@ -102,5 +102,11 @@ func SaveSession(c echo.Context, user *supabase.AuthenticatedDetails) {
 		emailKey:  user.User.Email,
 	}
 
-	_ = sess.Save(c.Request(), c.Response())
+	err = sess.Save(c.Request(), c.Response())
+	if err != nil {
+		log.Debug().
+			Err(err).
+			Str("emailID", user.User.Email).
+			Msg("Error while saving session")
+	}
 }

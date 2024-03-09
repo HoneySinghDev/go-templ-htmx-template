@@ -3,7 +3,7 @@ module github.com/HoneySinghDev/go-templ-htmx-template
 go 1.22
 
 require (
-	github.com/a-h/templ v0.2.543
+	github.com/a-h/templ v0.2.598
 	github.com/angelofallars/htmx-go v0.5.0
 	github.com/apple/pkl-go v0.5.3
 	github.com/cosmtrek/air v1.51.0
