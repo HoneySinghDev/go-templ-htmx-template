@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/HoneySinghDev/go-templ-htmx-template/pkl/pklgen"
+	"github.com/HoneySinghDev/go-templ-htmx-template/pkl/pklgen/environment"
 	"github.com/HoneySinghDev/go-templ-htmx-template/pkl/pklgen/loggerlevel"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -15,6 +16,7 @@ type Server struct {
 	Supabase   *pklgen.SupabaseConfig
 	Logger     *pklgen.LoggerConfig
 	Auth       *pklgen.AuthServerConfig
+	Env        environment.Environment
 	Management *pklgen.ManagementServerConfig
 }
 
@@ -30,6 +32,7 @@ func DefaultServiceConfig() Server {
 		Supabase:   cfg.SB,
 		Logger:     cfg.Logger,
 		Auth:       cfg.Auth,
+		Env:        cfg.ENV,
 		Management: cfg.Management,
 	}
 }

@@ -15,5 +15,5 @@ type User struct {
 	PasswordHash string             `json:"password_hash"`
 	CreatedAt    pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
-	Active       bool               `json:"active"`
+	Active       pgtype.Bool        `json:"active"`
 }

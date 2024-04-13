@@ -14,24 +14,24 @@
     }
   },
   "scripts": {
-    "watch": "parcel watch",
     "fmt": "prettier --write .",
-    "dev": "parcel build --no-optimize",
-    "build": "parcel build"
+    "build": "esbuild assets/scripts.js --bundle --minify --outdir=static/ && tailwindcss -i ./assets/styles.scss -o ./static/styles.css --minify",
+    "js:watch": "esbuild assets/scripts.js --bundle --outdir=static/ --watch=forever",
+    "tailwindcss:watch": "tailwindcss -i ./assets/styles.scss -o ./static/styles.css --watch",
+    "dev": "npm run js:watch & npm run tailwindcss:watch"
   },
   "dependencies": {
     "@tailwindcss/forms": "^0.5.7",
     "@tailwindcss/typography": "latest",
     "alpinejs": "latest",
+    "esbuild": "^0.20.2",
     "htmx.org": "latest",
-    "tailwindcss": "latest"
+    "tailwindcss": "^3.4.3"
   },
   "devDependencies": {
     "@iconify-json/bi": "^1.1.23",
     "@iconify-json/material-symbols": "^1.1.73",
     "@iconify/tailwind": "^0.1.4",
-    "@parcel/transformer-sass": "latest",
-    "parcel": "latest",
     "prettier": "latest"
   }
 }

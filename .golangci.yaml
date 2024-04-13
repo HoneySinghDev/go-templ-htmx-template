@@ -1,4 +1,3 @@
-
 funlen:
   # Checks the number of lines in a function.
   # If lower than 0, disable the check.
@@ -58,7 +57,7 @@ gomodguard:
       - github.com/golang/protobuf:
           recommendations:
             - google.golang.org/protobuf
-          reason: "see https://developers.google.com/protocol-buffers/docs/reference/go/faq#modules"
+          reason: 'see https://developers.google.com/protocol-buffers/docs/reference/go/faq#modules'
       - github.com/satori/go.uuid:
           recommendations:
             - github.com/google/uuid
@@ -97,7 +96,7 @@ nakedret:
 nolintlint:
   # Exclude following linters from requiring an explanation.
   # Default: []
-  allow-no-explanation: [ funlen, gocognit, lll ]
+  allow-no-explanation: [funlen, gocognit, lll]
   # Enable to require an explanation of nonzero length after each nolint directive.
   # Default: false
   require-explanation: true

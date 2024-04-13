@@ -4,6 +4,7 @@ package pklgen
 import (
 	"context"
 
+	"github.com/HoneySinghDev/go-templ-htmx-template/pkl/pklgen/environment"
 	"github.com/apple/pkl-go/pkl"
 )
 
@@ -17,6 +18,8 @@ type Pkl struct {
 	Auth *AuthServerConfig `pkl:"Auth"`
 
 	Logger *LoggerConfig `pkl:"Logger"`
+
+	ENV environment.Environment `pkl:"ENV"`
 
 	Management *ManagementServerConfig `pkl:"Management"`
 }

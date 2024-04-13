@@ -1,1 +1,0 @@
-<div class=\"text-white\">Hello world</div><button class=\"bg-green-400 text-gray-500 p-8 btn btn-primary\" @click=\"alert(&#39;Hello&#39;)\">Click me</button>

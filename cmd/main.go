@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"context"
+	"embed"
 	"errors"
+	"io/fs"
 	"net/http"
 	"os"
 	"os/signal"
@@ -12,6 +14,8 @@ import (
 	"github.com/HoneySinghDev/go-templ-htmx-template/internal/router"
 	"github.com/HoneySinghDev/go-templ-htmx-template/pkg/sb"
 	"github.com/HoneySinghDev/go-templ-htmx-template/pkg/server"
+	"github.com/HoneySinghDev/go-templ-htmx-template/pkl/pklgen/environment"
+	"github.com/labstack/echo/v4"
 
 	"github.com/rs/zerolog/log"
 
@@ -23,7 +27,7 @@ const (
 	timeOutValue = 10
 )
 
-func App() {
+func App(static embed.FS) {
 	c := config.DefaultServiceConfig()
 
 	// Setup logger
@@ -47,6 +51,10 @@ func App() {
 
 	router.Init(s)
 
+	// Serve static files
+	assetHandler := http.FileServer(getFileSystem(c.Env == environment.Prod, static))
+	s.Echo.GET("/static/*", echo.WrapHandler(http.StripPrefix("/static/", assetHandler)))
+
 	go func() {
 		if err := s.Start(); err != nil {
 			if errors.Is(err, http.ErrServerClosed) {
@@ -67,4 +75,19 @@ func App() {
 	if err := s.Shutdown(ctx); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Panic().Err(err).Msg("Failed to gracefully shut down server")
 	}
+}
+
+func getFileSystem(useOS bool, static embed.FS) http.FileSystem {
+	if useOS {
+		log.Debug().Msg("using OS mode")
+		return http.FS(os.DirFS("static"))
+	}
+
+	log.Debug().Msg("using embed mode")
+	fsys, err := fs.Sub(static, "static")
+	if err != nil {
+		panic(err)
+	}
+
+	return http.FS(fsys)
 }

@@ -3,12 +3,11 @@ tmp_dir = "tmp"
 
 [build]
 pre_cmd = [""]
-bin = "./tmp/main"
-cmd = "go build -o ./tmp/main ."
-include_dir = []
-include_ext = ["go"]
-include_file = [""]
-exclude_dir = ["bin", "dist","assets", "tmp", "vendor", "node_modules", "bin","tests", "vendor"]
+bin = "true"
+cmd = "echo 'running proxy one' && templ generate --notify-proxy --proxybind='localhost' --proxyport='8080'"
+include_dir = ["assets"]
+include_ext = [""]
+include_file = ["js,css"]
 exclude_file = []
 exclude_regex = ["_test\\.go", "_templ\\.go"]
 exclude_unchanged = false
@@ -35,8 +34,8 @@ watcher = "cyan"
 time = false
 
 [misc]
-clean_on_exit = false
+clean_on_exit = true
 
 [screen]
-clear_on_rebuild = false
+clear_on_rebuild = true
 keep_scroll = true

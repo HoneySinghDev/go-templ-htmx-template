@@ -1,4 +1,0 @@
-<div x-data=\"{ showError: true }\" x-init=\"setTimeout(() =&gt; { $el.classList.add(&#39;err-fadeout&#39;); setTimeout(() =&gt; { showError = false }, 250); }, 10000)\" x-show=\"showError\" class=\"
-\"><div>
-</div><button @click=\"$el.closest(&#39;div&#39;).classList.add(&#39;err-fadeout&#39;); setTimeout(() =&gt; { showError = false }, 250);\" class=\"font-bold\" class=\"font-bold\">X</button></div>
-<div id=\"errors\" class=\"absolute bottom-4 right-4 flex flex-col-reverse gap-2\"></div>

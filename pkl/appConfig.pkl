@@ -9,6 +9,7 @@ SB: SupabaseConfig
 DB: DatabaseConfig
 Auth: AuthServerConfig
 Logger: LoggerConfig
+const ENV: Environment = "dev"
 Management: ManagementServerConfig
 
 class EchoConfig {
@@ -81,5 +82,6 @@ class ManagementServerConfig {
   probeWriteableTouchfile: String = ".healthy"
 }
 
+typealias Environment = "dev"|"qa"|"prod"
 
 typealias LoggerLevel = "DEBUG" | "INFO" | "WARN" | "ERROR" | "FATAL" | "PANIC" | "Disabled" |"TRACE"
